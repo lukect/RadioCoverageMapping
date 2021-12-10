@@ -1,0 +1,3 @@
+rasterio~=1.2.10
+pyproj~=3.2.1
+matplotlib~=3.5.0
