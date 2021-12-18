@@ -26,7 +26,7 @@ def match(crs0, crs1):
 
 
 def reproject_elevation(show_reprojection):
-    with rasterio.open(defs.CROPPED_ELEVATION_DATA) as src:
+    with rasterio.open(defs.ORIGINAL_ELEVATION_DATA) as src:
         if not match(src.crs, defs.PROJECT_CRS):
             transform, width, height = calculate_default_transform(
                 src.crs, defs.PROJECT_CRS, src.width, src.height, *src.bounds)

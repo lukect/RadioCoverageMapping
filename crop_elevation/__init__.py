@@ -8,7 +8,7 @@ from defintions import Coordinates
 
 
 def run(show_cropped):
-    with rasterio.open(defs.ORIGINAL_ELEVATION_DATA) as elevation_data:
+    with rasterio.open(defs.REPROJECTED_ELEVATION_DATA) as elevation_data:
         transformer = Transformer.from_crs(crs_from=Coordinates.crs, crs_to=elevation_data.crs, always_xy=True)
         affine_nw = transformer.transform(Coordinates.nw_corner[0], Coordinates.nw_corner[1])
         affine_se = transformer.transform(Coordinates.se_corner[0], Coordinates.se_corner[1])
@@ -29,10 +29,10 @@ def run(show_cropped):
             'transform': transform
         })
 
-        with rasterio.open(defs.CROPPED_ELEVATION_DATA, 'w', **new_profile) as crop:
+        with rasterio.open(defs.FINAL_ELEVATION_DATA, 'w', **new_profile) as crop:
             crop.write(elevation_data.read(window=window))
         if show_cropped:
-            with rasterio.open(defs.CROPPED_ELEVATION_DATA) as cropped:
+            with rasterio.open(defs.FINAL_ELEVATION_DATA) as cropped:
                 show(cropped)
 
 
