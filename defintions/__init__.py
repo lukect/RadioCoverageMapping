@@ -14,7 +14,7 @@ REPROJECTED_ELEVATION_DATA = DATA_DIRECTORY / "Oban_REPROJECTED.TIF"
 # FINAL (cropped) elevation data
 FINAL_ELEVATION_DATA = DATA_DIRECTORY / "Oban_FINAL.TIF"
 
-# PROJECT_CRS = "EPSG:3035"
+# CRS used for processing in project (all data is converted to this before processing)
 PROJECT_CRS = "EPSG:3857"
 
 # Digital Elevation Model over Europe (EU-DEM) value to represent water in dataset
