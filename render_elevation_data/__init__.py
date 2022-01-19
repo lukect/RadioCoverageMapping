@@ -53,4 +53,6 @@ def save(rendered_map=None, file_name="map.png"):
 
 
 if __name__ == "__main__":
-    view()
+    render = render(defs.FINAL_ELEVATION_DATA)
+    view(render)
+    save(render)
