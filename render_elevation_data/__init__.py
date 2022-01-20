@@ -24,7 +24,7 @@ def render(elevation_data):
         # Create empty RGB image/pixel/map array
         height_map = np.zeros((data_band.shape[0], data_band.shape[1], 3), 'uint8')
 
-        # Render map
+        # Render map | Need Y,X because the EU-DEM data is in Y,X not X,Y
         for y in range(0, data_band.shape[0]):
             for x in range(0, data_band.shape[1]):
                 if data_band[y][x] == defs.EU_DEM_SEA_LEVEL:  # Draw water
