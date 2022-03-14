@@ -10,13 +10,13 @@ Copernicus Maps, so that there is full coverage over the mountainous region to c
 """
 
 import crop_elevation
-import render_elevation_data
+from terrain_map import render_map
 
 
 def main():
     # reproject_elevation.reproject_elevation(show_reprojection=True)
     crop_elevation.run(show_cropped=True)
-    render_elevation_data.save()
+    render_map.save()
 
 
 if __name__ == "__main__":

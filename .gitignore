@@ -2,4 +2,5 @@
 /venv/
 /conda_env/
 /data/
+/cache/
 /test/
