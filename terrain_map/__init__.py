@@ -9,6 +9,7 @@ class MapPoint:
     water: bool = False
     road: bool = False
     elevation: float = 0
+    long_lat_coords: Tuple[float, float] = 0, 0
 
 
 @dataclass
