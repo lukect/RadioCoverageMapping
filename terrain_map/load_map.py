@@ -80,7 +80,7 @@ def load(elevation_data=defs.FINAL_ELEVATION_DATA):
     for road in road_data.edges(data=True):
         if "geometry" in road[2]:
             geo_points = road[2]["geometry"]
-            for map_point in get_map_points(geo_points.long_lat_coords, transformer, transform):
+            for map_point in get_map_points(geo_points.coords, transformer, transform):
                 x = map_point[0]
                 y = map_point[1]
                 try:

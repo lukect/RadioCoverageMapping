@@ -1,5 +1,9 @@
+from __future__ import annotations  # Required for MapPoint.distance_to(other) type hint
+
 from dataclasses import dataclass
 from typing import List, Tuple
+
+from osmnx import distance
 
 
 @dataclass
@@ -10,6 +14,10 @@ class MapPoint:
     road: bool = False
     elevation: float = 0
     long_lat_coords: Tuple[float, float] = 0, 0
+
+    def distance(self, other: MapPoint) -> float:
+        return distance.great_circle_vec(lng1=self.long_lat_coords[0], lat1=self.long_lat_coords[1],
+                                         lng2=other.long_lat_coords[0], lat2=other.long_lat_coords[1])
 
 
 @dataclass
