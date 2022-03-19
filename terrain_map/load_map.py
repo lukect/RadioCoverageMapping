@@ -1,4 +1,7 @@
+import bz2
 import math
+import pathlib
+import pickle
 
 import osmnx
 import rasterio
@@ -95,6 +98,40 @@ def load(elevation_data=defs.FINAL_ELEVATION_DATA):
     return tm
 
 
+file_name = 'map.tm.bz2'
+
+
+def load_from_file(file: str = file_name) -> TerrainMap:
+    global loaded_terrain_map
+
+    if not pathlib.Path(file).exists():
+        print("Cannot find a saved TerrainMap")
+        print("Generating new TerrainMap")
+        return load()
+
+    try:
+        with bz2.BZ2File(file, 'r') as cf0:
+            loaded_terrain_map = pickle.load(cf0)
+    except Exception as e:
+        print("Error occurred loading when the saved TerrainMap:")
+        print(e)
+        print()
+        print("Generating new TerrainMap")
+        return load()
+    return loaded_terrain_map
+
+
 if __name__ == "__main__":
     load(elevation_data=defs.FINAL_ELEVATION_DATA)
     print("TerrainMap successfully loaded")
+
+    with bz2.BZ2File(file_name, 'w') as cf:
+        pickle.dump(loaded_terrain_map, cf, protocol=pickle.HIGHEST_PROTOCOL)
+    print("Successfully saved TerrainMap to file")
+    old_terrain_map = loaded_terrain_map
+    load_from_file()
+    print("Successfully opened saved TerrainMap file")
+    if loaded_terrain_map == old_terrain_map:
+        print("Successfully verified the saved TerrainMap")
+    else:
+        print("Could not verify the saved TerrainMap")
