@@ -8,5 +8,6 @@ dependencies:
   - GDAL=3.4
   - pyproj=3.3
   - matplotlib=3.5
-  - Pillow=8.4
+  - Pillow=9.0
   - osmnx=1.1
+  - scipy
