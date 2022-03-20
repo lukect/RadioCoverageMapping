@@ -3,7 +3,10 @@ from __future__ import annotations  # Required for MapPoint.distance_to(other) t
 from dataclasses import dataclass
 from typing import List, Tuple
 
+from affine import Affine
 from osmnx import distance
+from pyproj import Transformer
+from pyproj.enums import TransformDirection
 
 
 @dataclass
@@ -13,11 +16,6 @@ class MapPoint:
     water: bool = False
     road: bool = False
     elevation: float = 0
-    long_lat_coords: Tuple[float, float] = 0, 0
-
-    def distance(self, other: MapPoint) -> float:
-        return distance.great_circle_vec(lng1=self.long_lat_coords[0], lat1=self.long_lat_coords[1],
-                                         lng2=other.long_lat_coords[0], lat2=other.long_lat_coords[1])
 
 
 @dataclass
@@ -26,6 +24,8 @@ class TerrainMap:
        Mapped as y-x, NOT x-y, because rasterio and PIL use y-x order"""
 
     points: List[List[MapPoint]]
+    transformer: Transformer
+    affine_transform: Affine
 
     def __getitem__(self, y: int) -> List[MapPoint]:
         return self.points[y]
@@ -36,7 +36,25 @@ class TerrainMap:
         else:
             return 0, 0
 
+    def coords_to_map_yx(self, coords: Tuple[float, float]):
+        assert -180 <= coords[0] <= 180 and -90 <= coords[1] <= 90
+        raw_map_point = ~self.affine_transform * self.transformer.transform(coords[0], coords[1])
+        return tuple(map(int, raw_map_point))
 
-def create_empty_TerrainMap(y_size: int, x_size: int) -> TerrainMap:
+    def map_yx_to_coords(self, yx_position: Tuple[int, int]) \
+            -> Tuple[float, float]:
+        map_shape = self.shape()
+        assert all(yx_position) > 0 and yx_position[0] < map_shape[0] and yx_position[1] < map_shape[1]
+        transformed = self.affine_transform * (yx_position[0] + .5, yx_position[1] + .5)  # Get center of the square.
+        return self.transformer.transform(xx=transformed[0], yy=transformed[1], direction=TransformDirection.INVERSE)
+
+    def distance(self, map_point1: Tuple[int, int], map_point2: Tuple[int, int]) -> float:
+        c1 = self.map_yx_to_coords(map_point1)
+        c2 = self.map_yx_to_coords(map_point2)
+        return distance.great_circle_vec(lng1=c1[0], lat1=c1[1],
+                                         lng2=c2[0], lat2=c2[1])
+
+
+def create_empty_TerrainMap(y_size: int, x_size: int, transformer: Transformer, affine_transform: Affine) -> TerrainMap:
     assert y_size > 0 and x_size > 0
-    return TerrainMap([[MapPoint() for y in range(y_size)] for x in range(x_size)])
+    return TerrainMap([[MapPoint() for y in range(y_size)] for x in range(x_size)], transformer, affine_transform)

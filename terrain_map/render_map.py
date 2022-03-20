@@ -66,7 +66,7 @@ def render(tm: TerrainMap, draw_roads: bool = True):
 def view(image: Image = None):
     if image is None:
         if load_map.loaded_terrain_map is None:
-            load_map.load(defs.FINAL_ELEVATION_DATA)
+            load_map.generate()
 
         image = Image.fromarray(render(tm=load_map.loaded_terrain_map), mode="RGB")
 
@@ -77,7 +77,7 @@ def view(image: Image = None):
 def save(file_name: str = "map_with_roads.png", image: Image = None):
     if image is None:
         if load_map.loaded_terrain_map is None:
-            load_map.load(defs.FINAL_ELEVATION_DATA)
+            load_map.generate()
 
         image = Image.fromarray(render(tm=load_map.loaded_terrain_map), mode="RGB")
 

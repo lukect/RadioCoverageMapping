@@ -1,13 +1,7 @@
-import bz2
 import math
-import pathlib
-import pickle
 
 import osmnx
 import rasterio
-from affine import Affine
-from pyproj import Transformer
-from pyproj.enums import TransformDirection
 
 import defintions as defs
 import defintions.Coordinates as Coords
@@ -18,13 +12,11 @@ def range_inclusive(start: int, end: int):
     return range(start, end + 1)
 
 
-def get_map_points(coords_list: List[Tuple[float, float]], transformer: Transformer, affine_transform: Affine):
+def get_road_map_points(tmap: TerrainMap, coords_list: List[Tuple[float, float]]):
     map_points = []
 
     for coords in coords_list:
-        raw_map_point = ~affine_transform * transformer.transform(coords[0], coords[1])
-        raw_map_point = tuple(map(int, raw_map_point))
-
+        raw_map_point = tmap.coords_to_map_yx(coords)
         if len(map_points) > 0:
             last_point = map_points[-1]
             diff_x = raw_map_point[0] - last_point[0]
@@ -41,16 +33,10 @@ def get_map_points(coords_list: List[Tuple[float, float]], transformer: Transfor
     return map_points
 
 
-def map_yx_to_coords(yx_position: Tuple[int, int], transformer: Transformer, affine_transform: Affine) \
-        -> Tuple[float, float]:
-    transformed = affine_transform * (yx_position[0] + .5, yx_position[1] + .5)  # Get center of the square.
-    return transformer.transform(xx=transformed[0], yy=transformed[1], direction=TransformDirection.INVERSE)
-
-
 loaded_terrain_map: TerrainMap | None = None
 
 
-def load(elevation_data=defs.FINAL_ELEVATION_DATA):
+def generate(elevation_data=defs.FINAL_ELEVATION_DATA):
     # Elevation Data
     with rasterio.open(elevation_data) as src:
         print("Loading Elevation Data")
@@ -60,13 +46,12 @@ def load(elevation_data=defs.FINAL_ELEVATION_DATA):
         assert data_band.shape[1] > 0 and data_band.shape[0] > 0
         print("Creating an empty TerrainMap")
         # For some reason shape is x-y, although data is y-x
-        tm = create_empty_TerrainMap(data_band.shape[1], data_band.shape[0])
+        tm = create_empty_TerrainMap(data_band.shape[1], data_band.shape[0], transformer, transform)
         print("Created an empty TerrainMap with shape (y, x) = " + str(tm.shape()))
 
         print("Filling TerrainMap with Elevation, Water & Geo-coordinate Data")
         for y in range(0, data_band.shape[0]):
             for x in range(0, data_band.shape[1]):
-                tm[y][x].long_lat_coords = map_yx_to_coords((y, x), transformer, transform)
                 if data_band[y][x] == defs.EU_DEM_SEA_LEVEL:
                     tm[y][x].water = True
                 else:
@@ -83,7 +68,7 @@ def load(elevation_data=defs.FINAL_ELEVATION_DATA):
     for road in road_data.edges(data=True):
         if "geometry" in road[2]:
             geo_points = road[2]["geometry"]
-            for map_point in get_map_points(geo_points.coords, transformer, transform):
+            for map_point in get_road_map_points(tm, geo_points.coords):
                 x = map_point[0]
                 y = map_point[1]
                 try:
@@ -94,44 +79,10 @@ def load(elevation_data=defs.FINAL_ELEVATION_DATA):
     global loaded_terrain_map
     loaded_terrain_map = tm
 
-    print("Finished loading TerrainMap")
+    print("Finished generating TerrainMap")
     return tm
 
 
-file_name = 'map.tm.bz2'
-
-
-def load_from_file(file: str = file_name) -> TerrainMap:
-    global loaded_terrain_map
-
-    if not pathlib.Path(file).exists():
-        print("Cannot find a saved TerrainMap")
-        print("Generating new TerrainMap")
-        return load()
-
-    try:
-        with bz2.BZ2File(file, 'r') as cf0:
-            loaded_terrain_map = pickle.load(cf0)
-    except Exception as e:
-        print("Error occurred loading when the saved TerrainMap:")
-        print(e)
-        print()
-        print("Generating new TerrainMap")
-        return load()
-    return loaded_terrain_map
-
-
 if __name__ == "__main__":
-    load(elevation_data=defs.FINAL_ELEVATION_DATA)
+    generate(elevation_data=defs.FINAL_ELEVATION_DATA)
     print("TerrainMap successfully loaded")
-
-    with bz2.BZ2File(file_name, 'w') as cf:
-        pickle.dump(loaded_terrain_map, cf, protocol=pickle.HIGHEST_PROTOCOL)
-    print("Successfully saved TerrainMap to file")
-    old_terrain_map = loaded_terrain_map
-    load_from_file()
-    print("Successfully opened saved TerrainMap file")
-    if loaded_terrain_map == old_terrain_map:
-        print("Successfully verified the saved TerrainMap")
-    else:
-        print("Could not verify the saved TerrainMap")
