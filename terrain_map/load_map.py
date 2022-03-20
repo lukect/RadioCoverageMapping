@@ -12,22 +12,22 @@ def range_inclusive(start: int, end: int):
     return range(start, end + 1)
 
 
-def get_road_map_points(tmap: TerrainMap, coords_list: List[Tuple[float, float]]):
-    map_points = []
+def get_road_map_points(tmap: TerrainMap, coords_list: List[Tuple[float, float]]) -> List[Tuple[int, int]]:
+    map_points: List[Tuple[int, int]] = []
 
     for coords in coords_list:
         raw_map_point = tmap.coords_to_map_yx(coords)
         if len(map_points) > 0:
             last_point = map_points[-1]
-            diff_x = raw_map_point[0] - last_point[0]
-            diff_y = raw_map_point[1] - last_point[1]
-            dist = math.sqrt(diff_x ** 2 + diff_y ** 2)
+            diff_y = raw_map_point[0] - last_point[0]
+            diff_x = raw_map_point[1] - last_point[1]
+            dist = math.sqrt(diff_y ** 2 + diff_x ** 2)
             dist_int = int(dist)
-            for n in range(1, int(dist)):
-                midpoint = (int(last_point[0] + ((diff_x / dist_int) * n)),
-                            int(last_point[1] + ((diff_y / dist_int) * n)))
-                if midpoint not in map_points:
-                    map_points.append(midpoint)
+            for n in range(1, dist_int):
+                waypoint = (int(last_point[0] + ((diff_y / dist_int) * n)),
+                            int(last_point[1] + ((diff_x / dist_int) * n)))
+                if waypoint not in map_points:
+                    map_points.append(waypoint)
         map_points.append(raw_map_point)
 
     return map_points

@@ -1,6 +1,6 @@
-*/__pycache__/
+**/__pycache__/
 /venv/
 /conda_env/
 /data/
-/cache/
+**/cache/
 /test/
