@@ -19,6 +19,8 @@ is full coverage over the mountainous region to control the fire observation dro
 - Elevation data from [Copernicus EU-DEM v1.1](https://land.copernicus.eu/imagery-in-situ/eu-dem/eu-dem-v1.1)
 - Road data from [OpenStreetMap (OSM)](https://www.openstreetmap.org/)
 - Various Python dependencies to read from the aforementioned datasets [(See Conda environment.yml)](environment.yml)
+- [itmlogic](https://github.com/edwardoughton/itmlogic) to implement the Longley-Rice / Irregular Terrain Model
+  v1.2.2 [(See pathloss.itmlogic package)](https://github.com/lukect/FYP/tree/master/pathloss/itmlogic)
 
 ## Requirements to run ##
 
