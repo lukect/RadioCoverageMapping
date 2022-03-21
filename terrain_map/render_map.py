@@ -7,10 +7,11 @@ from terrain_map import load_map
 from terrain_map.load_map import range_inclusive
 
 
-def draw_red(map_img: np.ndarray, y: int, x: int):
-    map_img[y, x, 0] = 255
-    map_img[y, x, 1] = 0
-    map_img[y, x, 2] = 0
+def draw_red(map_img: np.ndarray, y: int, x: int, opacity: float):
+    transparency = 1 - opacity
+    map_img[y, x, 0] = round((map_img[y, x, 0] * transparency) + (255 * opacity))
+    map_img[y, x, 1] = round((map_img[y, x, 1] * transparency) + (0 * opacity))
+    map_img[y, x, 2] = round((map_img[y, x, 2] * transparency) + (0 * opacity))
 
 
 def draw_yellow(map_img: np.ndarray, y: int, x: int):
