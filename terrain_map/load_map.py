@@ -49,14 +49,14 @@ def generate(elevation_data=defs.FINAL_ELEVATION_DATA):
         tm = create_empty_TerrainMap(data_band.shape[1], data_band.shape[0], transformer, transform)
         print("Created an empty TerrainMap with shape (y, x) = " + str(tm.shape()))
 
-        print("Filling TerrainMap with Elevation, Water & Geo-coordinate Data")
+        print("Filling TerrainMap with Elevation & Water Data")
         for y in range(0, data_band.shape[0]):
             for x in range(0, data_band.shape[1]):
                 if data_band[y][x] == defs.EU_DEM_SEA_LEVEL:
                     tm[y][x].water = True
                 else:
                     tm[y][x].elevation = data_band[y][x]
-        print("Finished loading Elevation Data")
+        print("Finished loading Elevation & Water Data")
 
     # Road Data
     print("Loading Road Data")

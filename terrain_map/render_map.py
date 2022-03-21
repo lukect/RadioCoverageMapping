@@ -13,7 +13,7 @@ def draw_yellow(map_img: np.ndarray, y: int, x: int):
     map_img[y, x, 2] = 0
 
 
-def is_drawn(map_img: np.ndarray, y: int, x: int):
+def is_drawn(map_img: np.ndarray, y: int, x: int) -> bool:
     return map_img[y, x, 0] != 0 or map_img[y, x, 1] != 0 or map_img[y, x, 2] != 0
 
 
@@ -26,7 +26,7 @@ def draw_road_point(map_img: np.ndarray, y: int, x: int):
                 pass
 
 
-def render(tm: TerrainMap, draw_roads: bool = True):
+def render(tm: TerrainMap, draw_roads: bool = True) -> np.ndarray:
     print("Searching for minimum and maximum elevation")
     height_min = float("inf")
     height_max = float("-inf")
