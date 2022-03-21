@@ -7,6 +7,12 @@ from terrain_map import load_map
 from terrain_map.load_map import range_inclusive
 
 
+def draw_red(map_img: np.ndarray, y: int, x: int):
+    map_img[y, x, 0] = 255
+    map_img[y, x, 1] = 0
+    map_img[y, x, 2] = 0
+
+
 def draw_yellow(map_img: np.ndarray, y: int, x: int):
     map_img[y, x, 0] = 255
     map_img[y, x, 1] = 255

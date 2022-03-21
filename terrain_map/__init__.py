@@ -36,15 +36,18 @@ class TerrainMap:
         else:
             return 0, 0
 
+    def exists(self, yx_position: Tuple[int, int]) -> bool:
+        map_shape = self.shape()
+        return all(yx_position) >= 0 and yx_position[0] < map_shape[0] and yx_position[1] < map_shape[1]
+
     def coords_to_map_yx(self, coords: Tuple[float, float]) -> tuple[int, int]:
         assert -180 <= coords[0] <= 180 and -90 <= coords[1] <= 90
         raw_map_point = ~self.affine_transform * self.transformer.transform(coords[0], coords[1])
-        return int(raw_map_point[0]), int(raw_map_point[1])
+        return int(raw_map_point[1]), int(raw_map_point[0])
 
     def map_yx_to_coords(self, yx_position: Tuple[int, int]) -> Tuple[float, float]:
-        map_shape = self.shape()
-        assert all(yx_position) >= 0 and yx_position[0] < map_shape[0] and yx_position[1] < map_shape[1]
-        transformed = self.affine_transform * (yx_position[0] + .5, yx_position[1] + .5)  # Get center of the square.
+        assert self.exists(yx_position)
+        transformed = self.affine_transform * (yx_position[1] + .5, yx_position[0] + .5)  # .5 for center of the square
         return self.transformer.transform(xx=transformed[0], yy=transformed[1], direction=TransformDirection.INVERSE)
 
     def distance(self, map_point1: Tuple[int, int], map_point2: Tuple[int, int]) -> float:

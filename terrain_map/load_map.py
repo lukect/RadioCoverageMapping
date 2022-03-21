@@ -69,8 +69,8 @@ def generate(elevation_data=defs.FINAL_ELEVATION_DATA):
         if "geometry" in road[2]:
             geo_points = road[2]["geometry"]
             for map_point in get_road_map_points(tm, geo_points.coords):
-                x = map_point[0]
-                y = map_point[1]
+                y = map_point[0]
+                x = map_point[1]
                 try:
                     tm[y][x].road = True
                 except IndexError:  # Road geo goes 1 node beyond boundary because of truncate_by_edge
