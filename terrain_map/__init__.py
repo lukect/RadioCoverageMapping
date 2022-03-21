@@ -38,7 +38,7 @@ class TerrainMap:
 
     def exists(self, yx_position: Tuple[int, int]) -> bool:
         map_shape = self.shape()
-        return all(yx_position) >= 0 and yx_position[0] < map_shape[0] and yx_position[1] < map_shape[1]
+        return 0 <= yx_position[0] < map_shape[0] and 0 <= yx_position[1] < map_shape[1]
 
     def coords_to_map_yx(self, coords: Tuple[float, float]) -> tuple[int, int]:
         assert -180 <= coords[0] <= 180 and -90 <= coords[1] <= 90
