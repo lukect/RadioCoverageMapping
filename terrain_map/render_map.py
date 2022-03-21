@@ -1,5 +1,6 @@
 import numpy as np
 from PIL import Image
+from tqdm import tqdm
 
 import defintions as defs
 from terrain_map import TerrainMap
@@ -53,18 +54,20 @@ def render(tm: TerrainMap, draw_roads: bool = True) -> np.ndarray:
     map_render = np.zeros((yx_size[0], yx_size[1], 3), 'uint8')
 
     print("Render drawing started")
-    for y in range(0, yx_size[0]):
-        for x in range(0, yx_size[1]):
-            point = tm[y][x]
-            if is_drawn(map_render, y, x):  # Skip if already drawn on (if there is road [drawn as 3×3] next to pixel)
-                continue
-            elif draw_roads and point.road is True:
-                draw_road_point(map_render, y, x)  # Draw road
-            elif point.water is True:  # Draw water
-                map_render[y, x, 2] = 255  # Blue (band 2) for water
-            else:  # Draw terrain
-                # Closest to min.height = 50G, closest to max.height = 200G | Green (band 1) for terrain
-                map_render[y, x, 1] = 50 + (((point.elevation - height_min) / height_diff) * 150)
+    with tqdm(total=yx_size[0] * yx_size[1], smoothing=.025) as progress_bar:
+        for y in range(0, yx_size[0]):
+            for x in range(0, yx_size[1]):
+                point = tm[y][x]
+                if is_drawn(map_render, y, x):  # Skip if already drawn on (if road [drawn as 3×3] is next to pixel)
+                    continue
+                elif draw_roads and point.road is True:
+                    draw_road_point(map_render, y, x)  # Draw road
+                elif point.water is True:  # Draw water
+                    map_render[y, x, 2] = 255  # Blue (band 2) for water
+                else:  # Draw terrain
+                    # Closest to min.height = 50G, closest to max.height = 200G | Green (band 1) for terrain
+                    map_render[y, x, 1] = 50 + (((point.elevation - height_min) / height_diff) * 150)
+                progress_bar.update(1)
     print("Finished drawing")
 
     return map_render
