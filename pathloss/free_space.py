@@ -1,4 +1,4 @@
-from math import *
+from math import log10
 
 from scipy import constants
 
@@ -15,3 +15,11 @@ def free_space_dB(distances_meters: float, frequency_hertz: float) -> float:
     return (20 * log10(distances_meters)) \
            + (20 * log10(frequency_hertz)) \
            + (20 * log10((4 * constants.pi) / constants.c))
+
+
+def free_space_distance(attenuation_dB: float, frequency_hertz: float) -> float:
+    return 10 ** ((attenuation_dB + (20 * log10(constants.c / frequency_hertz)) - (20 * log10(4 * constants.pi))) / 20)
+
+
+if __name__ == '__main__':
+    print(free_space_distance(109, 800_000_000))

@@ -15,6 +15,12 @@ def draw_red(map_img: np.ndarray, y: int, x: int, opacity: float):
     map_img[y, x, 2] = round((map_img[y, x, 2] * transparency) + (0 * opacity))
 
 
+def draw_deep_pink(map_img: np.ndarray, y: int, x: int):
+    map_img[y, x, 0] = 255
+    map_img[y, x, 1] = 20
+    map_img[y, x, 2] = 147
+
+
 def draw_yellow(map_img: np.ndarray, y: int, x: int):
     map_img[y, x, 0] = 255
     map_img[y, x, 1] = 255
@@ -35,40 +41,46 @@ def draw_road_point(map_img: np.ndarray, y: int, x: int):
 
 
 def render(tm: TerrainMap, draw_roads: bool = True) -> np.ndarray:
-    print("Searching for minimum and maximum elevation")
+    print("Searching for minimum and maximum elevation", flush=True)
     height_min = float("inf")
     height_max = float("-inf")
-    for y in tm.points:
-        for p in y:
-            if p.elevation > height_max and not p.water:
-                height_max = p.elevation
-            if p.elevation < height_min and not p.water:
-                height_min = p.elevation
-    height_diff = height_max - height_min
-    print("Min elv. = " + str(height_min) + "m | Max elv. = " + str(height_max) + "m | Diff elv. = " + str(
-        height_diff) + "m")
-
-    print("Creating empty image rendering array")
+    max_loc = (-1, -1)
+    min_loc = (-1, -1)
     yx_size = tm.shape()
+    for y in range(yx_size[0]):
+        for x in range(yx_size[1]):
+            map_point = tm[y][x]
+            if map_point.elevation > height_max and not map_point.water:
+                height_max = map_point.elevation
+                max_loc = (y, x)
+            elif map_point.elevation < height_min and not map_point.water:
+                height_min = map_point.elevation
+                min_loc = (y, x)
+    height_diff = height_max - height_min
+    print("Min elv. = " + str(height_min) + "m @" + str(min_loc) + " | Max elv. = " + str(height_max) +
+          "m @" + str(max_loc) + " | Diff elv. = " + str(height_diff) + "m", flush=True)
+
+    print("Creating empty image rendering array", flush=True)
     # Create empty RGB image/pixel/map array
     map_render = np.zeros((yx_size[0], yx_size[1], 3), 'uint8')
 
-    print("Render drawing started")
+    print("Render drawing started", flush=True)
     with tqdm(total=yx_size[0] * yx_size[1], smoothing=.025) as progress_bar:
         for y in range(0, yx_size[0]):
-            for x in range(0, yx_size[1]):
-                point = tm[y][x]
-                if is_drawn(map_render, y, x):  # Skip if already drawn on (if road [drawn as 3×3] is next to pixel)
+            for map_point in range(0, yx_size[1]):
+                point = tm[y][map_point]
+                if is_drawn(map_render, y,
+                            map_point):  # Skip if already drawn on (if road [drawn as 3×3] is next to pixel)
                     continue
                 elif draw_roads and point.road is True:
-                    draw_road_point(map_render, y, x)  # Draw road
+                    draw_road_point(map_render, y, map_point)  # Draw road
                 elif point.water is True:  # Draw water
-                    map_render[y, x, 2] = 255  # Blue (band 2) for water
+                    map_render[y, map_point, 2] = 255  # Blue (band 2) for water
                 else:  # Draw terrain
                     # Closest to min.height = 50G, closest to max.height = 200G | Green (band 1) for terrain
-                    map_render[y, x, 1] = 50 + (((point.elevation - height_min) / height_diff) * 150)
+                    map_render[y, map_point, 1] = 50 + (((point.elevation - height_min) / height_diff) * 150)
                 progress_bar.update(1)
-    print("Finished drawing")
+    print("Finished drawing", flush=True)
 
     return map_render
 

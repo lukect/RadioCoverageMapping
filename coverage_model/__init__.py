@@ -1,3 +1,4 @@
+import math
 from typing import Tuple
 
 from PIL import Image
@@ -6,10 +7,12 @@ from tqdm import tqdm
 import defintions as defs
 import terrain_map.load_map
 import terrain_map.render_map
+from pathloss.dBm import watts_to_dBm
+from pathloss.free_space import free_space_distance
 from pathloss.itm import itm
 from terrain_map.load_map import range_inclusive
 
-coverage_search_range: int = 200
+one_third = 1 / 3
 
 """
 transmitter signal - attenuation = received signal
@@ -23,12 +26,15 @@ therefore:
 attenuation < transmitter signal - noise floor - minimum signal-to-noise
 """
 
-transmitter_power_dBm: float = 24
+transmitter_power_dBm: float = watts_to_dBm(1)
+transmitter_gain_dB: float = 0
+receiver_gain_dB: float = 0
 
 minimum_signal_to_noise_dBm: float = 10
-noise_floor_dBm: float = -96
+noise_floor_dBm: float = -100
 
-max_att_dB: float = transmitter_power_dBm - noise_floor_dBm - minimum_signal_to_noise_dBm
+max_att_dB: float = transmitter_power_dBm + transmitter_gain_dB + receiver_gain_dB\
+                    - noise_floor_dBm - minimum_signal_to_noise_dBm
 
 
 def run(freq_MHz: float, transmitter_coords: Tuple[float, float], transmitter_height: float,
@@ -39,25 +45,31 @@ def run(freq_MHz: float, transmitter_coords: Tuple[float, float], transmitter_he
         tm = terrain_map.load_map.loaded_terrain_map
     render = terrain_map.render_map.render(tm, draw_roads=True)
 
+    transmitter_yx = tm.coords_to_map_yx(transmitter_coords)
+    assert tm.exists(transmitter_yx)
+
     print('Calculating coverage')
     print('Maximum allowed attenuation = ' + str(max_att_dB) + 'dB')
-    transmitter_yx = tm.coords_to_map_yx(transmitter_coords)
 
-    half_range = int(coverage_search_range / 2)
+    shape = tm.shape()
 
-    one_third = 1 / 3
-
-    with tqdm(total=(coverage_search_range + 1) ** 2, smoothing=.025) as progress_bar:
-        for y in range_inclusive(transmitter_yx[0] - half_range,
-                                 transmitter_yx[0] + half_range):
-            for x in range_inclusive(transmitter_yx[1] - half_range,
-                                     transmitter_yx[1] + half_range):
-                yx = (y, x)
-                if tm.exists(yx):
+    max_dist = int(round(free_space_distance(max_att_dB, freq_MHz * 1_000_000)))
+    steps = round(max_dist / 25)
+    _y = range_inclusive(max(transmitter_yx[0] - steps, 0), min(transmitter_yx[0] + steps, shape[0] - 1))
+    _x = range_inclusive(max(transmitter_yx[1] - steps, 0), min(transmitter_yx[1] + steps, shape[1] - 1))
+    calcs = len(_y) * len(_x)
+    print('Calculating up to ' + str(max_dist) + 'm away (' + str(calcs) + ' calculations)')
+    with tqdm(total=calcs, smoothing=.025) as progress_bar:
+        for y in _y:
+            for x in _x:
+                dist_from_transmitter = math.sqrt(((transmitter_yx[0] - y) ** 2) + ((transmitter_yx[1] - x) ** 2))
+                if 0 < dist_from_transmitter <= 4:
+                    terrain_map.render_map.draw_deep_pink(render, y, x)
+                elif 4 <= dist_from_transmitter <= steps:  # ITM requires min 100m distance
                     attenuation_dB = itm(terrain=tm,
                                          freq_MHz=freq_MHz,
                                          transmitter_coords=transmitter_coords,
-                                         receiver_coords=tm.map_yx_to_coords(yx),
+                                         receiver_coords=tm.map_yx_to_coords((y, x)),
                                          transmitter_height=transmitter_height,
                                          receiver_height=receiver_height)
                     if attenuation_dB <= max_att_dB:
@@ -68,10 +80,11 @@ def run(freq_MHz: float, transmitter_coords: Tuple[float, float], transmitter_he
     return render
 
 
-file_path = defs.OUTPUT_DIRECTORY / 'coverage.png'
+file_path = defs.OUTPUT_DIRECTORY / 'coverage651.png'
 
 if __name__ == '__main__':
-    transmitter = -5.544048, 56.391095
-    img = run(freq_MHz=800, transmitter_coords=transmitter, transmitter_height=10, receiver_height=10)
+    transmitter = -5.455720, 56.427951
+    high_transmitter = -5.308657, 56.381646
+    img = run(freq_MHz=2_400, transmitter_coords=transmitter, transmitter_height=10, receiver_height=1.5)
     image = Image.fromarray(img, mode="RGB")
     image.save(fp=file_path, format="PNG", optimize=True)

@@ -40,17 +40,17 @@ loaded_terrain_map: TerrainMap | None = None
 def generate(elevation_data=defs.FINAL_ELEVATION_DATA):
     # Elevation Data
     with rasterio.open(elevation_data) as src:
-        print("Loading Elevation Data")
+        print("Loading Elevation Data", flush=True)
         transform = src.transform
         transformer = Transformer.from_crs(crs_from=Coords.crs, crs_to=src.crs, always_xy=True)
         data_band = src.read(1)
         assert data_band.shape[1] > 0 and data_band.shape[0] > 0
-        print("Creating an empty TerrainMap")
+        print("Creating an empty TerrainMap", flush=True)
         # For some reason shape is x-y, although data is y-x
         tm = create_empty_TerrainMap(data_band.shape[1], data_band.shape[0], transformer, transform)
-        print("Created an empty TerrainMap with shape (y, x) = " + str(tm.shape()))
+        print("Created an empty TerrainMap with shape (y, x) = " + str(tm.shape()), flush=True)
 
-        print("Filling TerrainMap with Elevation & Water Data")
+        print("Filling TerrainMap with Elevation & Water Data", flush=True)
         with tqdm(total=data_band.shape[0] * data_band.shape[1], smoothing=.025) as progress_bar:
             for y in range(0, data_band.shape[0]):
                 for x in range(0, data_band.shape[1]):
@@ -59,15 +59,15 @@ def generate(elevation_data=defs.FINAL_ELEVATION_DATA):
                     else:
                         tm[y][x].elevation = data_band[y][x]
                     progress_bar.update(1)
-        print("Finished loading Elevation & Water Data")
+        print("Finished loading Elevation & Water Data", flush=True)
 
     # Road Data
-    print("Loading Road Data")
+    print("Loading Road Data", flush=True)
     road_data = osmnx.graph_from_bbox(west=Coords.nw_corner[0], north=Coords.nw_corner[1], east=Coords.se_corner[0],
                                       south=Coords.se_corner[1], network_type='drive', retain_all=True,
                                       truncate_by_edge=True)
 
-    print("Filling TerrainMap with Road Data")
+    print("Filling TerrainMap with Road Data", flush=True)
     for road in road_data.edges(data=True):
         if "geometry" in road[2]:
             geo_points = road[2]["geometry"]
@@ -82,10 +82,10 @@ def generate(elevation_data=defs.FINAL_ELEVATION_DATA):
     global loaded_terrain_map
     loaded_terrain_map = tm
 
-    print("Finished generating TerrainMap")
+    print("Finished generating TerrainMap", flush=True)
     return tm
 
 
 if __name__ == "__main__":
     generate(elevation_data=defs.FINAL_ELEVATION_DATA)
-    print("TerrainMap successfully loaded")
+    print("TerrainMap successfully loaded", flush=True)

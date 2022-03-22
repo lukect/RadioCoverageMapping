@@ -36,7 +36,7 @@ def all_data(x):
     return data[data > 0]
 
 
-def determine_num_samples(distance_m: float) -> int:
+def determine_num_samples(distance_m: float, max_samples: int = 600) -> int:
     """
     Guarantee a number of samples between 2 and 600.
 
@@ -48,6 +48,8 @@ def determine_num_samples(distance_m: float) -> int:
     ----------
     distance_m : float
         Distance between transmitter and receiver in meters.
+    max_samples : int
+        Less than 2 and above 600 will be ignored
 
     Returns
     -------
@@ -56,10 +58,11 @@ def determine_num_samples(distance_m: float) -> int:
 
     """
 
-    return max(2, min(600, int(math.ceil(distance_m / 25))))
+    return max(2, min(max_samples, 600, int(math.ceil(distance_m / 25))))
 
 
-def terrain_p2p(tmap: TerrainMap,
+def terrain_p2p(max_samples: int,
+                tmap: TerrainMap,
                 transmitter_coordinates: Tuple[float, float],
                 receiver_coordinates: Tuple[float, float]) \
         -> Tuple[List[float], float]:
@@ -69,8 +72,10 @@ def terrain_p2p(tmap: TerrainMap,
 
     Parameters
     ----------
+    max_samples : int
+        Less than 2 and above 600 will be ignored
     tmap : TerrainMap
-        TerrainMap
+        Contains elevation data
     transmitter_coordinates : Tuple[float, float]
         Transmitter coordinates
     receiver_coordinates : Tuple[float, float]
@@ -90,7 +95,7 @@ def terrain_p2p(tmap: TerrainMap,
     distance_km = distance_m / 1e3
 
     # Interpolate along line to get sampling points
-    num_samples = determine_num_samples(distance_m)
+    num_samples = determine_num_samples(distance_m, max_samples)
 
     transmitter = tmap.coords_to_map_yx(transmitter_coordinates)
     receiver = tmap.coords_to_map_yx(receiver_coordinates)
@@ -100,8 +105,8 @@ def terrain_p2p(tmap: TerrainMap,
 
     surface_profile: List[float] = []
     for n in range(0, num_samples):
-        y = int(transmitter[0] + ((diff_y / num_samples) * n))
-        x = int(transmitter[1] + ((diff_x / num_samples) * n))
+        y = int(receiver[0] + ((diff_y / num_samples) * n))
+        x = int(receiver[1] + ((diff_x / num_samples) * n))
         surface_profile.append(tmap[y][x].elevation)
 
     return surface_profile, distance_km

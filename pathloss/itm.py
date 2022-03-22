@@ -13,6 +13,7 @@ def itm(terrain: TerrainMap,
         freq_MHz: float,
         transmitter_coords: Tuple[float, float], receiver_coords: Tuple[float, float],
         transmitter_height: float, receiver_height: float,
+        max_samples: int = 600,
         vertical_polarization: bool = False,
         terrain_relative_permittivity: float = 15,
         terrain_conductivity: float = 0.005,
@@ -35,6 +36,8 @@ def itm(terrain: TerrainMap,
             Transmitter's height above ground level
         receiver_height : float
             Receiver's height above ground level
+        max_samples : int
+            Longley-Rice Irregular Terrain Model surface points
         vertical_polarization : bool
             Polarization of the EM wave (False = Horizontal, True = Vertical)
         terrain_relative_permittivity : float
@@ -68,7 +71,8 @@ def itm(terrain: TerrainMap,
     # Surface refractivity (N-units): also controls effective Earth radius
     parameters['ens0'] = 314
 
-    measured_terrain_profile, distance_km = terrain_module.terrain_p2p(terrain, transmitter_coords, receiver_coords)
+    measured_terrain_profile, distance_km = terrain_module.terrain_p2p(max_samples, terrain,
+                                                                       transmitter_coords, receiver_coords)
 
     parameters['d'] = distance_km
 

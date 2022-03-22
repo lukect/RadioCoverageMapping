@@ -7,7 +7,7 @@ import defintions as defs
 from defintions import Coordinates
 
 
-def run(show_cropped):
+def run(show_cropped: bool = True):
     with rasterio.open(defs.REPROJECTED_ELEVATION_DATA) as elevation_data:
         transformer = Transformer.from_crs(crs_from=Coordinates.crs, crs_to=elevation_data.crs, always_xy=True)
         affine_nw = transformer.transform(Coordinates.nw_corner[0], Coordinates.nw_corner[1])
@@ -37,4 +37,4 @@ def run(show_cropped):
 
 
 if __name__ == "__main__":
-    run(show_cropped=True)
+    run()

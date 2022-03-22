@@ -25,7 +25,8 @@ def match(crs0, crs1):
     return False
 
 
-def reproject_elevation(show_reprojection):
+def run(show_reprojection: bool = True):
+    exit()
     with rasterio.open(defs.ORIGINAL_ELEVATION_DATA) as src:
         if not match(src.crs, defs.PROJECT_CRS):
             transform, width, height = calculate_default_transform(
@@ -51,3 +52,7 @@ def reproject_elevation(show_reprojection):
             if show_reprojection:
                 with rasterio.open(defs.REPROJECTED_ELEVATION_DATA) as final:
                     show(final)
+
+
+if __name__ == '__main__':
+    run()
