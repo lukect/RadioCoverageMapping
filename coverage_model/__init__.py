@@ -33,7 +33,7 @@ receiver_gain_dB: float = 0
 minimum_signal_to_noise_dBm: float = 10
 noise_floor_dBm: float = -100
 
-max_att_dB: float = transmitter_power_dBm + transmitter_gain_dB + receiver_gain_dB\
+max_att_dB: float = transmitter_power_dBm + transmitter_gain_dB + receiver_gain_dB \
                     - noise_floor_dBm - minimum_signal_to_noise_dBm
 
 
