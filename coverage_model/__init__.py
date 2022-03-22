@@ -7,7 +7,7 @@ from tqdm import tqdm
 import defintions as defs
 import terrain_map.load_map
 import terrain_map.render_map
-from pathloss.dBm import watts_to_dBm
+from pathloss.decibels import *
 from pathloss.free_space import free_space_distance
 from pathloss.itm import itm
 from terrain_map.load_map import range_inclusive
