@@ -31,13 +31,11 @@ def is_drawn(map_img: np.ndarray, y: int, x: int) -> bool:
     return map_img[y, x, 0] != 0 or map_img[y, x, 1] != 0 or map_img[y, x, 2] != 0
 
 
-def draw_road_point(map_img: np.ndarray, y: int, x: int):
+def draw_road_point(tm: TerrainMap, map_img: np.ndarray, y: int, x: int):
     for yy in range_inclusive(y - 1, y + 1):
         for xx in range_inclusive(x - 1, x + 1):
-            try:
+            if tm.exists((yy, xx)):
                 draw_yellow(map_img, yy, xx)
-            except IndexError:  # Road on boundary will cause draw beyond boundary
-                pass
 
 
 def render(tm: TerrainMap, draw_roads: bool = True) -> np.ndarray:
@@ -67,18 +65,18 @@ def render(tm: TerrainMap, draw_roads: bool = True) -> np.ndarray:
     print("Render drawing started", flush=True)
     with tqdm(total=yx_size[0] * yx_size[1], smoothing=.025) as progress_bar:
         for y in range(0, yx_size[0]):
-            for map_point in range(0, yx_size[1]):
-                point = tm[y][map_point]
+            for x in range(0, yx_size[1]):
+                point = tm[y][x]
                 if is_drawn(map_render, y,
-                            map_point):  # Skip if already drawn on (if road [drawn as 3×3] is next to pixel)
+                            x):  # Skip if already drawn on (if road [drawn as 3×3] is next to pixel)
                     continue
                 elif draw_roads and point.road is True:
-                    draw_road_point(map_render, y, map_point)  # Draw road
+                    draw_road_point(tm, map_render, y, x)  # Draw road
                 elif point.water is True:  # Draw water
-                    map_render[y, map_point, 2] = 255  # Blue (band 2) for water
+                    map_render[y, x, 2] = 255  # Blue (band 2) for water
                 else:  # Draw terrain
                     # Closest to min.height = 50G, closest to max.height = 200G | Green (band 1) for terrain
-                    map_render[y, map_point, 1] = 50 + (((point.elevation - height_min) / height_diff) * 150)
+                    map_render[y, x, 1] = 50 + (((point.elevation - height_min) / height_diff) * 150)
                 progress_bar.update(1)
     print("Finished drawing", flush=True)
 

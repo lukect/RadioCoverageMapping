@@ -27,9 +27,10 @@ def get_road_map_points(tmap: TerrainMap, coords_list: List[Tuple[float, float]]
             for n in range(1, dist_int):
                 waypoint = (int(last_point[0] + ((diff_y / dist_int) * n)),
                             int(last_point[1] + ((diff_x / dist_int) * n)))
-                if waypoint not in map_points:
+                if waypoint not in map_points and tmap.exists(waypoint):
                     map_points.append(waypoint)
-        map_points.append(raw_map_point)
+        if tmap.exists(raw_map_point):
+            map_points.append(raw_map_point)
 
     return map_points
 
@@ -44,10 +45,9 @@ def generate(elevation_data=defs.FINAL_ELEVATION_DATA):
         transform = src.transform
         transformer = Transformer.from_crs(crs_from=Coords.crs, crs_to=src.crs, always_xy=True)
         data_band = src.read(1)
-        assert data_band.shape[1] > 0 and data_band.shape[0] > 0
+        assert data_band.shape[0] > 0 and data_band.shape[1] > 0
         print("Creating an empty TerrainMap", flush=True)
-        # For some reason shape is x-y, although data is y-x
-        tm = create_empty_TerrainMap(data_band.shape[1], data_band.shape[0], transformer, transform)
+        tm = create_empty_TerrainMap(data_band.shape[0], data_band.shape[1], transformer, transform)
         print("Created an empty TerrainMap with shape (y, x) = " + str(tm.shape()), flush=True)
 
         print("Filling TerrainMap with Elevation & Water Data", flush=True)
@@ -65,7 +65,7 @@ def generate(elevation_data=defs.FINAL_ELEVATION_DATA):
     print("Loading Road Data", flush=True)
     road_data = osmnx.graph_from_bbox(west=Coords.nw_corner[0], north=Coords.nw_corner[1], east=Coords.se_corner[0],
                                       south=Coords.se_corner[1], network_type='drive', retain_all=True,
-                                      truncate_by_edge=True)
+                                      truncate_by_edge=True, clean_periphery=True)
 
     print("Filling TerrainMap with Road Data", flush=True)
     for road in road_data.edges(data=True):
@@ -74,10 +74,7 @@ def generate(elevation_data=defs.FINAL_ELEVATION_DATA):
             for map_point in get_road_map_points(tm, geo_points.coords):
                 y = map_point[0]
                 x = map_point[1]
-                try:
-                    tm[y][x].road = True
-                except IndexError:  # Road geo goes 1 node beyond boundary because of truncate_by_edge
-                    pass
+                tm[y][x].road = True
 
     global loaded_terrain_map
     loaded_terrain_map = tm

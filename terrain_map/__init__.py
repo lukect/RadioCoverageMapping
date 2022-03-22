@@ -56,7 +56,7 @@ class TerrainMap:
 
 def create_empty_TerrainMap(y_size: int, x_size: int, transformer: Transformer, affine_transform: Affine) -> TerrainMap:
     assert y_size > 0 and x_size > 0
-    return TerrainMap([[MapPoint() for y in range(y_size)] for x in range(x_size)], transformer, affine_transform)
+    return TerrainMap([[MapPoint() for x in range(x_size)] for y in range(y_size)], transformer, affine_transform)
 
 
 def coordinates_distance(coordinates1: Tuple[float, float], coordinates2: Tuple[float, float]) -> float:
