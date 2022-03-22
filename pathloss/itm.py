@@ -45,7 +45,7 @@ def itm(terrain: TerrainMap,
         terrain_conductivity : float
             Conductivity of the terrain in S/m [sgm]
         climate : int
-            Climate type: (1=equatorial, 2=continental subtropical, 3=maritime subtropical, 4=desert,
+            Climate type: 1=equatorial, 2=continental subtropical, 3=maritime subtropical, 4=desert,
             5=continental temperate, 6=maritime temperate overland, 7=maritime temperate oversea (5 is the default)
 
         Returns
