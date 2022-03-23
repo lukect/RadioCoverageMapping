@@ -4,8 +4,8 @@ import osmnx
 import rasterio
 from tqdm import tqdm
 
+import crop_elevation as crop
 import defintions as defs
-import defintions.Coordinates as Coords
 from terrain_map import *
 
 
@@ -43,7 +43,7 @@ def generate(elevation_data=defs.FINAL_ELEVATION_DATA):
     with rasterio.open(elevation_data) as src:
         print("Loading Elevation Data", flush=True)
         transform = src.transform
-        transformer = Transformer.from_crs(crs_from=Coords.crs, crs_to=src.crs, always_xy=True)
+        transformer = Transformer.from_crs(crs_from=crop.crs, crs_to=src.crs, always_xy=True)
         data_band = src.read(1)
         assert data_band.shape[0] > 0 and data_band.shape[1] > 0
         print("Creating an empty TerrainMap", flush=True)
@@ -63,8 +63,8 @@ def generate(elevation_data=defs.FINAL_ELEVATION_DATA):
 
     # Road Data
     print("Loading Road Data", flush=True)
-    road_data = osmnx.graph_from_bbox(west=Coords.nw_corner[0], north=Coords.nw_corner[1], east=Coords.se_corner[0],
-                                      south=Coords.se_corner[1], network_type='drive', retain_all=True,
+    road_data = osmnx.graph_from_bbox(west=crop.nw_corner[0], north=crop.nw_corner[1], east=crop.se_corner[0],
+                                      south=crop.se_corner[1], network_type='drive', retain_all=True,
                                       truncate_by_edge=True, clean_periphery=True)
 
     print("Filling TerrainMap with Road Data", flush=True)
