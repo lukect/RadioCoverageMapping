@@ -7,7 +7,6 @@ from tqdm import tqdm
 import defintions as defs
 import terrain_map.load_map
 import terrain_map.render_map
-from pathloss.decibels import *
 from pathloss.free_space import free_space_distance
 from pathloss.itm import itm
 from terrain_map.load_map import range_inclusive
@@ -16,7 +15,7 @@ one_third = 1 / 3
 
 """
 transmitter signal - attenuation = received signal
-minimum received signal = noise floor + minimum signal-to-noise
+minimum required signal reception = noise floor + minimum signal-to-noise
 
 therefore:
 transmitter signal - attenuation > noise floor + minimum signal-to-noise
@@ -26,9 +25,9 @@ therefore:
 attenuation < transmitter signal - noise floor - minimum signal-to-noise
 """
 
-transmitter_power_dBm: float = watts_to_dBm(1)
-transmitter_gain_dB: float = 0
-receiver_gain_dB: float = 0
+transmitter_power_dBm: float = 23
+transmitter_gain_dB: float = 20
+receiver_gain_dB: float = 20
 
 minimum_signal_to_noise_dBm: float = 10
 noise_floor_dBm: float = -100
@@ -37,8 +36,9 @@ max_att_dB: float = transmitter_power_dBm + transmitter_gain_dB + receiver_gain_
                     - noise_floor_dBm - minimum_signal_to_noise_dBm
 
 
-def run(freq_MHz: float, transmitter_coords: Tuple[float, float], transmitter_height: float,
-        receiver_height: float):
+def run(freq_MHz: float, transmitter_coords: Tuple[float, float],
+        transmitter_height: float, receiver_height: float,
+        max_surface_terrain_profile_samples: int = 600):
     if terrain_map.load_map.loaded_terrain_map is None:
         tm = terrain_map.load_map.generate()
     else:
@@ -71,7 +71,8 @@ def run(freq_MHz: float, transmitter_coords: Tuple[float, float], transmitter_he
                                          transmitter_coords=transmitter_coords,
                                          receiver_coords=tm.map_yx_to_coords((y, x)),
                                          transmitter_height=transmitter_height,
-                                         receiver_height=receiver_height)
+                                         receiver_height=receiver_height,
+                                         max_samples=max_surface_terrain_profile_samples)
                     if attenuation_dB <= max_att_dB:
                         terrain_map.render_map.draw_red(render, y, x, one_third)
                 progress_bar.update(1)
@@ -80,11 +81,21 @@ def run(freq_MHz: float, transmitter_coords: Tuple[float, float], transmitter_he
     return render
 
 
-file_path = defs.OUTPUT_DIRECTORY / 'coverage651.png'
-
 if __name__ == '__main__':
-    transmitter = -5.455720, 56.427951
-    high_transmitter = -5.308657, 56.381646
-    img = run(freq_MHz=2_400, transmitter_coords=transmitter, transmitter_height=10, receiver_height=1.5)
+    high = -5.308657, 56.381646
+    oban_out = -5.455720, 56.427951
+
+    transmitter = oban_out
+    freq_MHz = 10_000
+    transmitter_height = 20
+    receiver_height = 100
+
+    img = run(freq_MHz=freq_MHz, transmitter_coords=transmitter,
+              transmitter_height=transmitter_height, receiver_height=receiver_height,
+              max_surface_terrain_profile_samples=100)
     image = Image.fromarray(img, mode="RGB")
-    image.save(fp=file_path, format="PNG", optimize=True)
+    file = defs.OUTPUT_DIRECTORY / ("coverage_f" + str(freq_MHz)
+                                    + "_th" + str(transmitter_height)
+                                    + "_rh" + str(receiver_height)
+                                    + "_coords" + str(transmitter) + ".png")
+    image.save(fp=file, format="PNG", optimize=True)

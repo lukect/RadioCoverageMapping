@@ -13,9 +13,9 @@ from pyproj.enums import TransformDirection
 class MapPoint:
     """Represents a 25m × 25m square on the map."""
 
+    elevation: float = 0
     water: bool = False
     road: bool = False
-    elevation: float = 0
 
 
 @dataclass

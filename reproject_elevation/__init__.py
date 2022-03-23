@@ -26,7 +26,6 @@ def match(crs0, crs1):
 
 
 def run(show_reprojection: bool = True):
-    exit()
     with rasterio.open(defs.ORIGINAL_ELEVATION_DATA) as src:
         if not match(src.crs, defs.PROJECT_CRS):
             transform, width, height = calculate_default_transform(

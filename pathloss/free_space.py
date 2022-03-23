@@ -1,6 +1,6 @@
 from scipy import constants
 
-from decibels import *
+from pathloss.decibels import *
 
 
 def free_space_power_received(distances_meters: float, frequency_hertz: float, power_transmitted_W: float) -> float:
