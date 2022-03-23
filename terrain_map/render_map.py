@@ -67,8 +67,7 @@ def render(tm: TerrainMap, draw_roads: bool = True) -> np.ndarray:
         for y in range(0, yx_size[0]):
             for x in range(0, yx_size[1]):
                 point = tm[y][x]
-                if is_drawn(map_render, y,
-                            x):  # Skip if already drawn on (if road [drawn as 3×3] is next to pixel)
+                if is_drawn(map_render, y, x):  # Skip if already drawn on (if road [drawn as 3×3] is next to pixel)
                     continue
                 elif draw_roads and point.road is True:
                     draw_road_point(tm, map_render, y, x)  # Draw road
