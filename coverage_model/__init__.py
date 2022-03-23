@@ -84,11 +84,12 @@ def run(freq_MHz: float, transmitter_coords: Tuple[float, float],
 if __name__ == '__main__':
     high = -5.308657, 56.381646
     oban_out = -5.455720, 56.427951
+    lismore_lighthouse = -5.586764910128153, 56.46462979716061
 
-    transmitter = oban_out
-    freq_MHz = 10_000
-    transmitter_height = 20
-    receiver_height = 100
+    transmitter = lismore_lighthouse
+    freq_MHz = 3_800
+    transmitter_height = 5
+    receiver_height = 300
 
     img = run(freq_MHz=freq_MHz, transmitter_coords=transmitter,
               transmitter_height=transmitter_height, receiver_height=receiver_height,

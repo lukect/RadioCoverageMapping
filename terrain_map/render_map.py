@@ -93,7 +93,7 @@ def view(image: Image = None):
     return image
 
 
-def save(file_name: str = "map_with_roads.png", image: Image = None):
+def save(file_name: str = "map.png", image: Image = None):
     if image is None:
         if load_map.loaded_terrain_map is None:
             load_map.generate()
