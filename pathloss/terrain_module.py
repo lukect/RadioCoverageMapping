@@ -1,39 +1,8 @@
 import math
 from typing import Tuple, List
 
-import numpy as np
-
 import terrain_map
 from terrain_map import TerrainMap
-
-
-def interdecile_range(x: List[float]) -> int:
-    """
-    Get range between bottom 10% and top 10% of values.
-
-    Parameters
-    ----------
-    x : list
-        Terrain profile values.
-
-    Returns
-    -------
-    interdecile_range : int
-        The terrain irregularity parameter.
-
-    """
-    q90, q10 = np.percentile(x, [90, 10])
-
-    return int(round(q90 - q10, 0))
-
-
-def all_data(x):
-    """
-    Get all data points within mask, with values greater than zero.
-
-    """
-    data = x.compressed()
-    return data[data > 0]
 
 
 def determine_num_samples(distance_m: float, max_samples: int = 600) -> int:
