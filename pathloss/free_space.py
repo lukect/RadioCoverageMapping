@@ -18,10 +18,10 @@ def free_space_dB(distances_meters: float, frequency_hertz: float) -> float:
 
 
 def free_space_distance(attenuation_dB: float, frequency_hertz: float) -> float:
-    return 10 ** ((attenuation_dB + (2 * to_dB(constants.c / frequency_hertz)) - (2 * to_dB(4 * constants.pi))) / 20)
+    return 10 ** ((attenuation_dB - (2 * to_dB(frequency_hertz)) - (2 * to_dB((4 * constants.pi) / constants.c))) / 20)
 
 
 if __name__ == '__main__':
-    print(free_space_distance(109, 800_000_000))
+    print(free_space_distance(100, 800_000_000))
     print(free_space_dB(43, 40000))
     print(free_space_dBm(599, 532_000_000, 1))
